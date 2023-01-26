@@ -1,0 +1,66 @@
+version: '3'
+
+networks:
+  proxy:
+    external: true
+  internal:
+
+services:
+  spotifyback:
+    image: yooooomi/your_spotify_server
+    container_name: spotifyback
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    links:
+      - spotifydb
+    depends_on:
+      - spotifydb
+    environment:
+      - API_ENDPOINT=https://sapi.domain.tld
+      - CLIENT_ENDPOINT=https://spotify.domain.tld
+      - SPOTIFY_PUBLIC=  # ClientID from dashboard
+      - SPOTIFY_SECRET=  # Secret from dashboard
+      - MONGO_ENDPOINT=mongodb://spotifydb:27017/your_spotify
+      - TIMEZONE=Europe/Paris
+      - PUID=1000
+      - PGID=1000
+    networks:
+      - internal
+      - proxy
+
+  spotifydb:
+    container_name: spotifydb
+    image: mongo:4.4.8
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./db:/data/db
+    environment:
+      - PUID=1000
+      - PGID=1000
+    networks:
+      - internal
+
+  spotifyfront:
+    image: yooooomi/your_spotify_client
+    container_name: spotifyfront
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    depends_on:
+      - spotifyback
+    environment:
+      - API_ENDPOINT=https://sapi.domain.tld
+      - PUID=1000
+      - PGID=1000
+    networks:
+      - proxy
+      - internal
+
+# Ports: 
+# If you want to publish the ports:
+# spotify back port: 8080
+# spotify front port: 3000 
+# spotify db port: 27017 
