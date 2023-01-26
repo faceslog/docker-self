@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  duplicati:
+    image: ghcr.io/linuxserver/duplicati
+    container_name: duplicati
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - TZ=Europe/Paris
+    volumes:
+      - ./config:/config                     # Volume Mount to the config folder of all your docker containers
+      - /path/to/local/backupfolder:/backups # If the backup needs to be stored on your machine, add a volume mount to that path here
+      - /path/to/folder/to/backup:/source    # Volume Mount to the folder that needs to backed up
+#    ports:
+#      - 8200:8200
+    networks:
+      - proxy # To connect this container to portainer
+            
+networks:
+  proxy:
+    external: true
