@@ -26,7 +26,7 @@ services:
     depends_on:
       - npm-db
     networks:
-      - proxy     # To connect this container to proxy
+      - proxy
       - wireguard # To connect to wireguard
       - internal
             
