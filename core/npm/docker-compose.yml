@@ -1,0 +1,56 @@
+version: '3' 
+
+services:
+  npm-app:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: 'npm-app'
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - '80:80'
+      - '443:443'
+#      - '81:81' can be reached via wireguard
+    environment:
+      PUID: 1000
+      PGID: 1000
+      DB_MYSQL_HOST: "npm-db"
+      DB_MYSQL_PORT: 3306
+      DB_MYSQL_USER: "npm"
+      DB_MYSQL_PASSWORD: "CHANGE ME"
+      DB_MYSQL_NAME: "npm"
+    volumes:
+      - ./app:/data
+      - ./letsencrypt:/etc/letsencrypt
+      - /var/log/npm:/data/logs
+    depends_on:
+      - npm-db
+    networks:
+      - proxy     # To connect this container to portainer
+      - wireguard # To connect to wireguard
+      - internal
+            
+  npm-db:
+    image: "jc21/mariadb-aria:latest"
+    container_name: "npm-db"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      PUID: 1000
+      PGID: 1000
+      MYSQL_ROOT_PASSWORD: "CHANGE ME"
+      MYSQL_DATABASE: "npm"
+      MYSQL_USER: "npm"
+      MYSQL_PASSWORD: "CHANGE ME"
+    volumes:
+      - ./db:/var/lib/mysql
+    networks:
+     - internal
+     
+networks:
+  internal:
+  wireguard:
+    external: true
+  proxy:
+    external: true
