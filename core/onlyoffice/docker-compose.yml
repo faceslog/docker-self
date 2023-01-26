@@ -1,0 +1,27 @@
+version: '3'
+  
+services:
+ onlyoffice:
+    container_name: onlyoffice
+    image: onlyoffice/documentserver:latest
+    restart: unless-stopped
+    environment:
+      - JWT_ENABLED=true
+      - JWT_SECRET=YOUR_MLG_SECRET_TOKEN
+    expose:
+      - 80
+      - 443
+    volumes:
+      - ./data:/var/www/onlyoffice/Data         # Certificates
+      - ./cache:/var/lib/onlyoffice             # Cache
+      - ./db:/var/lib/postgresql                # Database
+      - /var/log/onlyoffice:/var/log/onlyoffice # Logs
+    # To use behind a proxy with nextcloud create a network aliases
+    networks:
+      proxy:
+        aliases:
+          - docs.domain.tld
+
+networks:
+  proxy:
+    external: true
