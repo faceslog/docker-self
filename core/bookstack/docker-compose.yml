@@ -1,0 +1,62 @@
+---
+version: "3"
+
+# "proxy" is the network of nginx if you want to publish remove networks
+# and publish directly the port
+networks:
+ proxy:
+  external: true
+ internal:
+
+services:
+  bookstack:
+    image: ghcr.io/linuxserver/bookstack
+    container_name: bookstack
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - APP_URL='https://wiki.domain.tld'
+      - DB_HOST=bookstack_db
+      - DB_USER=bookstack
+      - DB_PASS=CHANGE_ME
+      - DB_DATABASE=bookstackapp
+      # Mail Settings
+      - MAIL_DRIVER=smtp
+      - MAIL_HOST=CHANGE_ME
+      - MAIL_PORT=587
+      - MAIL_ENCRYPTION=tls
+      - MAIL_USERNAME=CHANGE_ME
+      - MAIL_PASSWORD=CHANGE_ME
+      - MAIL_FROM=noreply@domain.tld
+      - MAIL_FROM_NAME=BookStack
+    volumes:
+      - ./app:/config
+#    ports:
+#      - 6875:80
+    networks:
+      - proxy
+      - internal
+    depends_on:
+      - bookstack_db
+
+  bookstack_db:
+    image: ghcr.io/linuxserver/mariadb
+    container_name: bookstack_db
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - MYSQL_ROOT_PASSWORD=CHANGE_ME
+      - TZ=Europe/Paris
+      - MYSQL_DATABASE=bookstackapp
+      - MYSQL_USER=bookstack
+      - MYSQL_PASSWORD=CHANGE_ME
+    volumes:
+      - ./db:/config
+    networks:
+      - internal
