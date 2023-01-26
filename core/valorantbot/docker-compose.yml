@@ -1,0 +1,15 @@
+version: "3"
+
+services:
+  valbot:
+    container_name: valbot
+    image: ghcr.io/giorgi-o/skinpeek/skinpeek
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./app:/usr/app/data
+      - ./app/config.json:/usr/app/config.json
