@@ -1,0 +1,68 @@
+version: '3'
+
+networks:
+  proxy:
+    external: true
+  internal:
+
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    container_name: "vaultwarden"
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+#   ports:
+#	    - 80:80
+#	    - 3012:3012	
+    volumes:
+      - ./app:/data
+      - /var/log/vaultwarden:/data/logs
+    environment:
+      - PUID=1000
+      - PGID=1000
+#      - ROCKET_PORT=8080 utiliser si docker non root
+      - TZ=Europe/Paris
+      - DOMAIN=https://vault.domain.tld
+      # DB log string mysql://<vaultwarden_user>:<vaultwarden_pw>@mariadb/vaultwarden
+      - DATABASE_URL=TODO
+      - LOG_FILE=/data/logs/vaultwarden.log
+      # Required to use websockets
+      - WEBSOCKET_ENABLED=true 
+      # Security Stuff and disable SIGNUPS
+      - SIGNUPS_ALLOWED=true   
+      - SIGNUPS_VERIFY=true
+      - INVITATIONS_ALLOWED=false
+      - SHOW_PASSWORD_HINT=false
+      #openssl rand -base64 48
+      - ADMIN_TOKEN=TODO
+      # Mail Settings
+      - SMTP_HOST=TODO
+      - SMTP_FROM=vault@domain.tld
+      - SMTP_FROM_NAME=vaultwarden
+      - SMTP_SECURITY=starttls
+      - SMTP_PORT=587
+      - SMTP_USERNAME=TODO
+      - SMTP_PASSWORD=TODO
+      - SMTP_TIMEOUT=15
+    depends_on:
+      - vaultwarden_db
+    networks:
+      - internal
+      - proxy
+
+  vaultwarden_db:
+    image: mariadb
+    container_name: vaultwarden_db
+    hostname: mariadb
+    restart: unless-stopped
+    volumes:
+     - ./db:/var/lib/mysql
+     - /etc/localtime:/etc/localtime:ro
+    environment:
+     - MYSQL_ROOT_PASSWORD=TODO
+     - MYSQL_PASSWORD=TODO
+     - MYSQL_DATABASE=vaultwarden
+     - MYSQL_USER=TODO
+    networks:
+     - internal
