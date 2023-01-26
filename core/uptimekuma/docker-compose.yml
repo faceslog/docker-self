@@ -1,0 +1,24 @@
+---
+version: '3'
+
+networks:
+ proxy:
+  external: true
+
+services:
+  kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: kuma
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - TZ=Europe/Paris
+      - PUID=1000
+      - PGID=1000
+#    ports: Uncomment and comment network to publish
+#      - 8255:80
+    volumes:
+      - ./app:/app/data
+    networks:
+      - proxy
