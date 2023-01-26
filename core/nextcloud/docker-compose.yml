@@ -1,0 +1,50 @@
+version: '3'
+
+networks:
+  proxy:
+    external: true
+  internal:
+  
+services:
+  nextcloud-app:
+    image: nextcloud
+    container_name: nextcloud-app
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./app:/var/www/html
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - MYSQL_PASSWORD=CHANGE_ME
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+      - MYSQL_HOST=nextcloud-db
+    depends_on:
+      - nextcloud-db
+    networks:
+      proxy:
+        aliases:
+        # To use with only office without issue ! 
+          - nextcloud.domain.tld 
+      internal:
+
+  nextcloud-db:
+    image: mariadb
+    container_name: nextcloud-db
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./db:/var/lib/mysql
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - MYSQL_ROOT_PASSWORD=CHANGE_ME
+      - MYSQL_PASSWORD=CHANGE_ME
+      - MYSQL_DATABASE=nextcloud
+      - MYSQL_USER=nextcloud
+    networks:
+      - internal
