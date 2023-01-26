@@ -1,0 +1,22 @@
+---
+version: '3'
+services:
+  watchtower:
+    image: containrrr/watchtower
+    restart: unless-stopped
+    container_name: watchtower
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+      - WATCHTOWER_CLEANUP=true
+      - WATCHTOWER_INCLUDE_RESTARTING=true
+      - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=https://discord.com/api/webhooks/CHANGE ME !!!!!/slack
+      - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER=WEBHOOKNAME
+      - WATCHTOWER_NOTIFICATIONS=slack
+      - WATCHTOWER_SCHEDULE=0 0 7 * * *
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /etc/localtime:/etc/localtime:ro
+    security_opt:
+      - no-new-privileges:true
