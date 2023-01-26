@@ -1,0 +1,25 @@
+version: '3.6'
+
+services:
+  flame:
+    image: pawelmalak/flame
+    container_name: flame
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    volumes:
+      - ./app:/app/data
+#      - /var/run/docker.sock:/var/run/docker.sock # optional but required for Docker integration
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+      - PASSWORD=YOUR_PASSWORD
+#    ports:
+#      - 5005:5005
+    networks:
+      - proxy # To connect this container to portainer
+            
+networks:
+  proxy:
+    external: true
