@@ -8,18 +8,20 @@ networks:
 services:
   umami:
     image: ghcr.io/umami-software/umami:postgresql-latest
-    container_name: unami
+    container_name: umami
     security_opt:
       - no-new-privileges:true
     environment:
       PUID: 1000
       PGID: 1000
-      DATABASE_URL: postgresql://umami:CHANGE_ME@unamidb:5432/umami # postgresql://username:password@host:port/dbname
+      DATABASE_URL: postgresql://umami:CHANGE_ME@umamidb:5432/umami # postgresql://username:password@host:port/dbname
       DATABASE_TYPE: postgresql
+      TRACKER_SCRIPT_NAME: mimi # avoid adblock/ublock
+      COLLECT_API_ENDPOINT: /api/mimi # avoid adblock/ublock
       HASH_SALT:  # CHANGE ME openssl rand -base64 32
       DISABLE_TELEMETRY: 1
     depends_on:
-      - unamidb
+      - umamidb
     restart: unless-stopped
 #    ports:
 #      - "3000:3000"
@@ -27,9 +29,9 @@ services:
       - proxy
       - internal
 
-  unamidb:
+  umamidb:
     image: postgres:12-alpine
-    container_name: unamidb
+    container_name: umamidb
     security_opt:
       - no-new-privileges:true
     environment:
