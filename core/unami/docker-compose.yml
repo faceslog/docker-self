@@ -1,0 +1,47 @@
+version: '3'
+
+networks:
+  proxy:
+    external: true
+  internal:
+
+services:
+  umami:
+    image: ghcr.io/umami-software/umami:postgresql-latest
+    container_name: unami
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      PUID: 1000
+      PGID: 1000
+      DATABASE_URL: postgresql://umami:CHANGE_ME@unamidb:5432/umami # postgresql://username:password@host:port/dbname
+      DATABASE_TYPE: postgresql
+      HASH_SALT:  # CHANGE ME openssl rand -base64 32
+      DISABLE_TELEMETRY: 1
+    depends_on:
+      - unamidb
+    restart: unless-stopped
+#    ports:
+#      - "3000:3000"
+    networks:
+      - proxy
+      - internal
+
+  unamidb:
+    image: postgres:12-alpine
+    container_name: unamidb
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      PUID: 1000
+      PGID: 1000
+      POSTGRES_DB: umami
+      POSTGRES_USER: umami
+      POSTGRES_PASSWORD: # YOUR AMAZING PASSWORD
+    volumes:
+      - ./db/sql/schema.postgresql.sql:/docker-entrypoint-initdb.d/schema.postgresql.sql:ro
+      - ./db/data:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      - internal
+    
