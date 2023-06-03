@@ -1,0 +1,37 @@
+version: "3.8"
+
+networks:
+  proxy:
+    external: true
+
+services:
+  linkstack:
+    hostname: 'linkstack'
+    container_name: 'linkstack'
+    image: 'linkstackorg/linkstack:latest'
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: 'Europe/Paris'
+      PUID: 1000
+      PGID: 1000
+      SERVER_ADMIN: 'your@email.com'
+      HTTP_SERVER_NAME: 'example.com'
+      HTTPS_SERVER_NAME: 'example.com'
+      LOG_LEVEL: 'info'
+      PHP_MEMORY_LIMIT: '256M'
+      UPLOAD_MAX_FILESIZE: '8M'
+    volumes:
+      - 'linkstack:/htdocs'
+    networks:
+      - proxy
+
+# ports available on the app are 80 for http and 443 for https
+
+volumes:
+  helystack:
+    external: true
+
+# volume
+# docker volume create --driver local --opt type=none --opt o=bind --opt device=/path/to/volume linkstack
