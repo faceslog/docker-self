@@ -1,0 +1,21 @@
+version: '3.5'
+
+networks:
+  proxy:
+    external: true
+
+services:
+  dashdot:
+    container_name: dashdot
+    image: mauricenino/dashdot:latest
+    restart: unless-stopped
+    privileged: true
+    environment:
+      DASHDOT_SHOW_HOST: 'true'
+      DASHDOT_ALWAYS_SHOW_PERCENTAGES: 'true'
+    volumes:
+      - /:/mnt/host:ro
+    networks:
+      - proxy
+
+# You can bind port also to expose the app directly 80:3001
