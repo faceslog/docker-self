@@ -1,0 +1,26 @@
+version: '3.3'
+
+networks:
+  proxy:
+    external: true
+
+services:
+  stirling-pdf:
+    container_name: stirling
+    image: frooodle/s-pdf:latest
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      TZ: Europe/Paris
+      PUID: 1000
+      PGID: 1000
+    volumes:
+      - ./data/training:/usr/share/tesseract-ocr/4.00/tessdata 
+      - ./data/configs:/configs
+      - ./data/customFiles:/customFiles/
+    networks:
+      - proxy
+
+#  ports:
+#   - '8080:8080'
