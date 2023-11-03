@@ -15,8 +15,10 @@ services:
       TZ: Europe/Paris
       PUID: 1000
       PGID: 1000
+      DOCKER_ENABLE_SECURITY: true
+      SECURITY_ENABLE_LOGIN: true
     volumes:
-      - ./data/training:/usr/share/tesseract-ocr/4.00/tessdata 
+      - ./data/training:/usr/share/tesseract-ocr/4.00/tessdata
       - ./data/configs:/configs
       - ./data/customFiles:/customFiles/
     networks:
