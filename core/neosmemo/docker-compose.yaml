@@ -1,0 +1,23 @@
+version: "3.0"
+
+services:
+  memos:
+    image: neosmemo/memos:stable
+    container_name: memos
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - TZ=Europe/Paris
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./data/memos/:/var/opt/memos
+#    ports:
+#      - 5230:5230
+  networks:
+    - proxy
+
+networks:
+  proxy:
+    external: true
