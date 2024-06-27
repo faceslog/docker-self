@@ -1,0 +1,83 @@
+version: "3.7"
+
+networks:
+  cloudflared:
+  headscale:
+
+services:
+  headscale:
+    image: headscale/headscale:0.22.3
+    restart: unless-stopped
+    container_name: headscale
+#    ports:
+#      - "127.0.0.1:8080:8080"
+#      - "127.0.0.1:9090:9090"
+    volumes:
+      - ./config/:/etc/headscale
+    command: headscale serve
+    depends_on:
+      - cloudflared
+    networks:
+      - headscale
+      
+  headscale-webui:
+    image: ghcr.io/ifargle/headscale-webui:latest
+    container_name: headscale-webui
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+      - COLOR=red                              # Use the base colors (ie, no darken-3, etc) - 
+      - HS_SERVER=https://your.domain.dev      # Reachable endpoint for your Headscale server
+      - DOMAIN_NAME=https://your.domain.dev    # The base domain name for this container.
+      - SCRIPT_NAME=/web                       # This is your applications base path (wsgi requires the name "SCRIPT_NAME").  Remove if you are hosing at the root /
+      - KEY="YourKeyBetweenQuotes"             # Generate with "openssl rand -base64 32" - used to encrypt your key on disk.
+      - LOG_LEVEL=info                         # Log level.  "DEBUG", "ERROR", "WARNING", or "INFO".  Default "INFO"
+      # ENV for Basic Auth (Used only if AUTH_TYPE is "Basic").  Can be omitted if you aren't using Basic Auth
+      - AUTH_TYPE=basic                        # AUTH_TYPE is either Basic or OIDC.  Empty for no authentication
+      - BASIC_AUTH_USER=user                   # Used for basic auth
+      - BASIC_AUTH_PASS=pass                   # Used for basic auth     
+    volumes:
+      - ./webui:/data                # Headscale-WebUI's storage.  Make sure ./volume is readable by UID 1000 (chown 1000:1000 ./volume)
+      - ./config/:/etc/headscale/:ro # Headscale's config storage location.  Used to read your Headscale config.
+    networks:
+        - headscale
+    depends_on:
+      - cloudflared
+      - headscale
+  
+    cloudflared: 
+      image: cloudflare/cloudflared:latest
+      container_name: cloudflared
+      restart: unless-stopped
+      command: "tunnel --no-autoupdate run" 
+      security_opt:
+        - no-new-privileges:true
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - TUNNEL_TOKEN=MY_AMAZING_TOKEN
+      networks:
+        - cloudflared
+
+    watchtower:
+      image: containrrr/watchtower:latest
+      restart: unless-stopped
+      container_name: watchtower
+      environment:
+        - PUID=1000
+        - PGID=1000
+        - TZ=Europe/Paris
+        - WATCHTOWER_CLEANUP=true
+        - WATCHTOWER_INCLUDE_RESTARTING=true
+        - WATCHTOWER_NOTIFICATION_SLACK_HOOK_URL=https://discord.com/api/webhooks/CHANGE_ME/slack
+        - WATCHTOWER_NOTIFICATION_SLACK_IDENTIFIER=WEBHOOKNAME
+        - WATCHTOWER_NOTIFICATIONS=slack
+        - WATCHTOWER_SCHEDULE=0 0 7 * * *
+      volumes:
+        - /var/run/docker.sock:/var/run/docker.sock
+        - /etc/localtime:/etc/localtime:ro
+      security_opt:
+        - no-new-privileges:true
